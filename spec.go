@@ -198,6 +198,8 @@ WRAP:
 		if t.Day() == 1 {
 			if !nextDay {
 				t = t.AddDate(0, 0, -1)
+				//after -1 day, t can before bf, so we need to check this condition
+				//if t not after bf, so current t not satisfy, continue get next t
 				if !t.After(bf) {
 					t = t.AddDate(0, 0, 1)
 					goto WRAP
