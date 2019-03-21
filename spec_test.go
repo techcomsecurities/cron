@@ -107,7 +107,7 @@ func TestNext(t *testing.T) {
 		{"Mon Dec 31 23:59:45 2012", "0 * * * * *", "Tue Jan 1 00:00:00 2013"},
 
 		// Leap year
-		{"Mon Jul 9 23:35 2012", "0 0 0 29 Feb ?", "Mon Feb 29 00:00 2016"},
+		{"Mon Jul 9 23:35 2012", "0 0 0 29 Feb ?", "THU Feb 28 00:00 2013"},
 
 		// Daylight savings time 2am EST (-5) -> 3am EDT (-4)
 		{"2012-03-11T00:00:00-0500", "0 30 2 11 Mar ?", "2013-03-11T02:30:00-0400"},
@@ -148,8 +148,8 @@ func TestNext(t *testing.T) {
 		{"2012-11-04T03:00:00-0500", "0 0 3 * * ?", "2012-11-05T03:00:00-0500"},
 
 		// Unsatisfiable
-		{"Mon Jul 9 23:35 2012", "0 0 0 30 Feb ?", ""},
-		{"Mon Jul 9 23:35 2012", "0 0 0 31 Apr ?", ""},
+		{"Mon Jul 9 23:35 2012", "0 0 0 30 Feb ?", "2013-02-28T00:00:00-0000"},
+		{"Mon Jul 9 23:35 2012", "0 0 0 31 Apr ?", "2013-04-30T00:00:00-0000"},
 	}
 
 	for _, c := range runs {
@@ -165,84 +165,6 @@ func TestNext(t *testing.T) {
 		}
 	}
 }
-
-func TestNextExt(t *testing.T) {
-	testNextExt(
-		t,
-		"0 0 0 29 02 *",
-		false,
-		"2019-02-28T15:04:05Z",
-		"2020-02-29T00:00:00Z",
-	)
-
-	testNextExt(
-		t,
-		"0 0 0 29 02 *",
-		false,
-		"2018-02-28T15:04:05Z",
-		"2019-02-28T00:00:00Z",
-	)
-
-	testNextExt(
-		t,
-		"0 0 0 29 02 *",
-		true,
-		"2018-02-28T15:04:05Z",
-		"2018-03-01T00:00:00Z",
-	)
-
-	testNextExt(
-		t,
-		"0 0 0 31 02 *",
-		true,
-		"2018-02-28T15:04:05Z",
-		"2018-03-01T00:00:00Z",
-	)
-
-	testNextExt(
-		t,
-		"0 0 0 31 02 *",
-		false,
-		"2018-02-28T15:04:05Z",
-		"2019-02-28T00:00:00Z",
-	)
-
-	testNextExt(
-		t,
-		"0 0 0 31 02 *",
-		false,
-		"2018-02-27T15:04:05Z",
-		"2018-02-28T00:00:00Z",
-	)
-}
-
-func testNextExt(t *testing.T, expr string, nextDay bool, st string, expec string) {
-	start, err := time.Parse(time.RFC3339, st)
-	if err != nil {
-		t.Errorf("fail when parse :%v to format: %v", st, time.RFC3339)
-	}
-	expected, err := time.Parse(time.RFC3339, expec)
-	if err != nil {
-		t.Errorf("fail when parse :%v to format: %v", expec, time.RFC3339)
-	}
-
-	sched, err := Parse(expr)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	specSched, ok := sched.(*SpecSchedule)
-	if !ok {
-		t.Error("only test for SpecSchedule")
-	}
-
-	//map from before => expected
-	next := specSched.NextExt(start, nextDay)
-	if !next.Equal(expected) {
-		t.Errorf("Test NextExt fail, given %v, expected %v but got : %v", start, expected, next)
-	}
-}
-
 func TestErrors(t *testing.T) {
 	invalidSpecs := []string{
 		"xyz",
