@@ -47,10 +47,7 @@ var (
 
 const (
 	// Set the top bit if a star was included in the expression.
-	starBit        = 1 << 63
-	day29   uint64 = 1 << 29
-	day30   uint64 = 1 << 30
-	day31   uint64 = 1 << 31
+	starBit = 1 << 63
 )
 
 // Next returns the next time this schedule is activated, greater than the given
@@ -157,8 +154,7 @@ func dayMatches(s *SpecSchedule, t time.Time) bool {
 	if !domMatch {
 		//if expected 29, 30 , 31 but the day not exist in current month
 		//28 will be matched day
-		lastDaysOfMonth := day29 | day30 | day31
-		if lastDaysOfMonth&s.Dom > 0 && t.AddDate(0, 0, 1).Day() == 1 {
+		if 1<<uint(t.Day()) < s.Dom && t.AddDate(0, 0, 1).Day() == 1 {
 			domMatch = true
 		}
 	}
